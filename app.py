@@ -6,7 +6,10 @@ st.set_page_config(page_title="AI Operations Assistant", layout="wide")
 st.title("AI Operations Assistant")
 st.write("Multi-Agent AI System (Planner → Executor → Verifier)")
 
+
+# =============================
 # Architecture Panel
+# =============================
 
 with st.expander("System Architecture Overview"):
     st.markdown("""
@@ -23,6 +26,7 @@ Verifier Agent
 
 # Task Input
 
+
 task = st.text_area(
     "Enter your task",
     height=100,
@@ -31,6 +35,7 @@ task = st.text_area(
 
 
 # Example Prompts
+
 
 st.markdown("Example Prompts")
 
@@ -42,7 +47,10 @@ if col1.button("ML Repos and Multi-City Weather"):
 if col2.button("Python Repositories Only"):
     task = "Find Python repositories"
 
+
+
 # Run Task
+
 
 if st.button("Run Task"):
 
@@ -50,15 +58,23 @@ if st.button("Run Task"):
         st.warning("Please enter a task.")
 
     else:
-        with st.spinner("Processing multi-agent pipeline..."):
+
+        with st.spinner("Planner → Executor → Verifier pipeline running..."):
 
             try:
+
+                # Backend API Call
                 response = requests.post(
                     "http://127.0.0.1:8000/run-task",
-                    json={"task": task}
+                    json={"task": task},
+                    timeout=15
                 )
 
+                # Raise HTTP Errors
+                response.raise_for_status()
+
                 result = response.json()
+
                 st.success("Task completed successfully")
 
                 st.subheader("Agent Execution Flow")
@@ -68,9 +84,10 @@ if st.button("Run Task"):
 
                 st.divider()
 
-               
+                
                 # Planner Output
-               
+                
+
                 st.subheader("Planner Output")
                 st.json(result.get("plan"))
 
@@ -79,6 +96,7 @@ if st.button("Run Task"):
                 
                 # Executor Results
                 
+
                 st.subheader("Executor Results")
 
                 execution_data = result.get("result", {}).get("data", {})
@@ -95,7 +113,7 @@ if st.button("Run Task"):
                         st.write(repo["description"])
                         st.write("---")
 
-                # Weather Results 
+                # Weather Results
                 if "weather" in execution_data:
 
                     st.markdown("Weather Information")
@@ -113,6 +131,7 @@ if st.button("Run Task"):
                 
                 # Verifier Status
                 
+
                 st.subheader("Verifier Status")
 
                 verifier_output = result.get("result", {})
@@ -129,7 +148,8 @@ if st.button("Run Task"):
 
                 
                 # Summary Dashboard
-                
+               
+
                 st.subheader("Execution Summary")
 
                 col1, col2 = st.columns(2)
@@ -146,8 +166,36 @@ if st.button("Run Task"):
                         len(execution_data["weather"])
                     )
 
+                
+                # Execution Timing Dashboard
+                
+
+                timing_data = result.get("timing", {})
+
+                if timing_data:
+
+                    st.divider()
+                    st.subheader("Execution Timing")
+
+                    tcol1, tcol2, tcol3, tcol4 = st.columns(4)
+
+                    tcol1.metric("Planner Time (s)", timing_data.get("planner_time", 0))
+                    tcol2.metric("Executor Time (s)", timing_data.get("executor_time", 0))
+                    tcol3.metric("Verifier Time (s)", timing_data.get("verifier_time", 0))
+                    tcol4.metric("Total Time (s)", timing_data.get("total_time", 0))
+
+            except requests.exceptions.Timeout:
+                st.error("Backend request timed out. Please try again.")
+
+            except requests.exceptions.ConnectionError:
+                st.error("Cannot connect to backend. Make sure FastAPI server is running.")
+
+            except requests.exceptions.HTTPError as err:
+                st.error(f"HTTP error occurred: {err}")
+
             except Exception as e:
-                st.error(f"Backend connection failed: {e}")
+                st.error(f"Unexpected error occurred: {e}")
+
 
 st.markdown("---")
 st.caption("Built using FastAPI, Streamlit, Groq LLM and Multi-Agent Architecture")

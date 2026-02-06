@@ -1,45 +1,24 @@
-import os
 import requests
-from dotenv import load_dotenv
-from llm.logger import logger
+from utils.retry_timer import retry
 
-load_dotenv()
 
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+@retry(max_attempts=3, delay=2)
+def search_github_repositories(query):
 
-def search_github_repositories(query, limit=5):
-    logger.info(f"Searching GitHub repos for: {query}")
+    url = f"https://api.github.com/search/repositories?q={query}&sort=stars"
 
-    url = "https://api.github.com/search/repositories"
+    response = requests.get(url, timeout=5)
 
-    headers = {
-        "Authorization": f"token {GITHUB_TOKEN}"
-    }
+    data = response.json()
 
-    params = {
-        "q": query,
-        "sort": "stars",
-        "order": "desc",
-        "per_page": limit
-    }
+    results = []
 
-    try:
-        response = requests.get(url, headers=headers, params=params)
-        response.raise_for_status()
+    for repo in data["items"][:5]:
+        results.append({
+            "name": repo["name"],
+            "url": repo["html_url"],
+            "stars": repo["stargazers_count"],
+            "description": repo["description"]
+        })
 
-        data = response.json()
-
-        results = []
-        for repo in data.get("items", []):
-            results.append({
-                "name": repo["name"],
-                "url": repo["html_url"],
-                "stars": repo["stargazers_count"],
-                "description": repo["description"]
-            })
-
-        return results
-
-    except Exception as e:
-        logger.error(f"GitHub API error: {e}")
-        return {"error": str(e)}
+    return results

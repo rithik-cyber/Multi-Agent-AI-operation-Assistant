@@ -2,6 +2,7 @@ import json
 import re
 from llm.llm_config import client
 from llm.logger import logger
+from utils.retry_timer import measure_time
 
 
 def extract_json(text):
@@ -11,7 +12,7 @@ def extract_json(text):
         return match.group(0)
     return None
 
-
+@measure_time
 def create_plan(user_task):
     logger.info("Planner agent started")
 

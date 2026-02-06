@@ -1,8 +1,9 @@
 from llm.logger import logger
 from tools.github_tool import search_github_repositories
 from tools.weather_tool import get_weather
+from utils.retry_timer import measure_time
 
-
+@measure_time
 def execute_plan(plan):
     logger.info("Executor agent started")
 

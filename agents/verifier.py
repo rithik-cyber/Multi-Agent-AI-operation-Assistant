@@ -1,6 +1,8 @@
 from llm.logger import logger
+from utils.retry_timer import measure_time
 
 
+@measure_time
 def verify_results(execution_result):
     logger.info("Verifier agent started")
 

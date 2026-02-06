@@ -1,38 +1,40 @@
-import os
 import requests
-from dotenv import load_dotenv
-from llm.logger import logger
+import os
 
-load_dotenv()
+API_KEY = os.getenv("WEATHER_API_KEY")
+BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
 
-WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
+
+def clean_city_input(city):
+    # Remove natural language noise
+    city = city.replace("tomorrow", "").strip()
+    return city
+
 
 def get_weather(city):
-    logger.info(f"Fetching weather for: {city}")
 
-    url = "http://api.openweathermap.org/data/2.5/weather"
+    city = clean_city_input(city)
 
     params = {
         "q": city,
-        "appid": WEATHER_API_KEY,
+        "appid": API_KEY,
         "units": "metric"
     }
 
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()
+    response = requests.get(BASE_URL, params=params)
 
-        data = response.json()
+    if response.status_code != 200:
+        return {"error": f"Weather API failed for {city}"}
 
-        weather_info = {
-            "city": data["name"],
-            "temperature": data["main"]["temp"],
-            "description": data["weather"][0]["description"],
-            "humidity": data["main"]["humidity"]
-        }
+    data = response.json()
 
-        return weather_info
+    # Defensive validation
+    if "main" not in data:
+        return {"error": f"Invalid weather data for {city}"}
 
-    except Exception as e:
-        logger.error(f"Weather API error: {e}")
-        return {"error": str(e)}
+    return {
+        "city": city,
+        "temperature": data["main"]["temp"],
+        "description": data["weather"][0]["description"],
+        "humidity": data["main"]["humidity"]
+    }
