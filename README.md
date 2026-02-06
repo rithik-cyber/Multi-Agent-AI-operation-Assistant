@@ -16,17 +16,33 @@ Build an intelligent assistant capable of:
 ---
 
 ## System Architecture
+<p align="center">
+  <img src="assets/architecture.jpg" width="850"/>
+</p>
 
-User Prompt
-↓
-Planner Agent
-↓
-Executor Agent
-↓
-Verifier Agent
-↓
-Final Output
+### Architecture Workflow
+The system processes user requests through a structured multi-agent pipeline to ensure reliable and verified results.
 
+#### Step 1 — User Request
+The user submits a natural language task through the Streamlit interface.
+
+#### Step 2 — Frontend Processing
+Streamlit forwards the request to the FastAPI backend for processing.
+
+#### Step 3 — Planning Phase
+The Planner Agent analyzes the user request and generates structured execution steps by identifying required tools and APIs.
+
+#### Step 4 — Execution Phase
+The Executor Agent executes the planned steps by calling internal tools and external APIs such as GitHub, Weather, or News services.
+
+#### Step 5 — Data Aggregation
+The Executor collects responses from all tools and organizes them into a structured format.
+
+#### Step 6 — Verification Phase
+The Verifier Agent validates results to ensure accuracy, completeness, and consistency.
+
+#### Step 7 — Final Response
+The verified results are returned to the frontend and displayed to the user.
 
 ---
 
@@ -73,27 +89,29 @@ Provides latest news retrieval capability.
 ---
 
 ## 📂 Project Folder Structure
-
-agents/
-planner.py
-executor.py
-verifier.py
-
-tools/
-github_tool.py
-weather_tool.py
-news_tool.py
-
-llm/
-llm_config.py
-logger.py
-
-main.py
-app.py
-requirements.txt
-.env.example
-README.md
-
+```
+Multi-Agent-AI-operation-Assistant
+│
+├── agents
+│   ├── planner.py
+│   ├── executor.py
+│   └── verifier.py
+│
+├── tools
+│   ├── github_tool.py
+│   ├── weather_tool.py
+│   └── news_tool.py
+│
+├── llm
+│   ├── llm_config.py
+│   └── logger.py
+│
+├── main.py
+├── app.py
+├── requirements.txt
+├── .env.example
+└── README.md
+```
 
 ---
 
@@ -101,86 +119,98 @@ README.md
 
 Follow these steps exactly to run the project locally.
 
----
 
 ### Step 1 — Clone Repository
-
 ```bash
 git clone https://github.com/rithik-cyber/Multi-Agent-AI-operation-Assistant.git
 cd Multi-Agent-AI-operation-Assistant
-Step 2 — Create Virtual Environment
-Windows
+```
+
+### Step 2 — Create Virtual Environment
+## Windows
+```bash
 python -m venv venv
 venv\Scripts\activate
-Mac/Linux
+```
+
+## MAC/Linux
+```bash
 python3 -m venv venv
 source venv/bin/activate
-Step 3 — Install Dependencies
+```
+
+### Step 3 — Install Dependencies
+```bash
 pip install -r requirements.txt
-Step 4 — Configure Environment Variables
-Create a .env file and copy values from .env.example.
+```
 
-GROQ_API_KEY=
-GITHUB_TOKEN=
-WEATHER_API_KEY=
-NEWS_API_KEY=
-Step 5 — Run Backend API : uvicorn main:app --reload
-Step 6 — Run Streamlit UI
-Open a new terminal and run: streamlit run app.py
-Step 7 — Open Application
-Streamlit will automatically generate a browser link.
+### Step 4 — Configure Environment Variables
+```bash
+GROQ_API_KEY=your_key_here
+GITHUB_TOKEN=your_token_here
+WEATHER_API_KEY=your_key_here
+NEWS_API_KEY=your_key_here
+```
 
-Example Prompts
+### Step 5 — Run Backend
+```bash
+uvicorn main:app --reload
+```
+
+### Step 6 — Run Streamlit UI
+```bash
+streamlit run app.py
+** before Launching streamlit make sure Backend is running.**
+```
+
+
+## Example Prompts
 Try the following prompts in the Streamlit interface:
-
+```
 Find machine learning repositories and weather in Delhi
-
 Show Python repositories and weather in Mumbai
-
 Give weather updates for Punjab, Delhi, and Bangalore
-
 Find trending AI repositories
-
 Show weather in Chennai and ML repositories
+```
 
- End-to-End Execution Flow
--User enters prompt
--Planner creates structured execution plan
--Executor calls APIs and gathers data
--Verifier validates outputs
--UI displays final verified result
+## End-to-End Execution Flow
+- User enters prompt
+- Planner creates structured execution plan
+- Executor calls APIs and gathers data
+- Verifier validates outputs
+- UI displays final verified result
 
-📜 Logging and Monitoring
+## Logging and Monitoring
 The system logs:
--Agent reasoning steps
--Tool execution results
--Errors and failures
--Execution summaries
+- Agent reasoning steps
+- Tool execution results
+- Errors and failures
+- Execution summaries
 
- Known Limitations
--Duplicate repositories may appear across queries
--Limited tool set (expandable architecture)
--No persistent execution history storage
--News API not fully exposed in UI
+## Known Limitations
+- Duplicate repositories may appear across queries
+- Limited tool set (expandable architecture)
+- No persistent execution history storage
+- News API not fully exposed in UI
 
- Design Tradeoffs
--Modularity vs Performance
+## Design Tradeoffs
+- Modularity vs Performance: 
 The system favors modular expansion over maximum runtime optimization.
-
--Verification Layer
+- Verification Layer: 
 Adds reliability but slightly increases response latency.
 
- Extensibility
+## Extensibility
 The architecture supports easy addition of:
--Additional agents
--More API integrations
--Database storage
--Memory and caching layers
+- Additional agents
+- More API integrations
+- Database storage
+- Memory and caching layers
 
-🛠 Tech Stack
-Python
-FastAPI
-Streamlit
-Groq LLM
-REST APIs
-Async Programming
+## Tech Stack
+- Python
+- FastAPI
+- Streamlit
+- Groq LLM
+- REST APIs
+- Async Programming
